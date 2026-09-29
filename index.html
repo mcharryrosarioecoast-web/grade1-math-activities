@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Math Star Adventures</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            fredoka: ["Fredoka", "sans-serif"]
+          },
+          boxShadow: {
+            soft: "0 15px 40px rgba(67, 56, 202, .12)",
+            card: "0 10px 30px rgba(15, 23, 42, .08)"
+          },
+          animation: {
+            float: "float 3s ease-in-out infinite",
+            pop: "pop .35s ease-out",
+            wiggle: "wiggle .5s ease-in-out",
+            confetti: "confetti 1.2s ease-out forwards"
+          },
+          keyframes: {
+            float: {
+              "0%,100%": { transform: "translateY(0)" },
+              "50%": { transform: "translateY(-10px)" }
+            },
+            pop: {
+              "0%": { transform: "scale(.85)", opacity: "0" },
+              "100%": { transform: "scale(1)", opacity: "1" }
+            },
+            wiggle: {
+              "0%,100%": { transform: "rotate(0)" },
+              "25%": { transform: "rotate(-5deg)" },
+              "75%": { transform: "rotate(5deg)" }
+            },
+            confetti: {
+              "0%": {
+                transform: "translateY(0) rotate(0)",
+                opacity: "1"
+              },
+              "100%": {
+                transform: "translateY(300px) rotate(720deg)",
+                opacity: "0"
+              }
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Fredoka", sans-serif;
+      background:
+        radial-gradient(circle at 10% 10%, rgba(255,255,255,.9), transparent 22%),
+        radial-gradient(circle at 90% 15%, rgba(251,191,36,.2), transparent 20%),
+        linear-gradient(135deg, #eef2ff 0%, #f5f3ff 45%, #fdf2f8 100%);
+      min-height: 100vh;
+    }
+
+    .glass {
+      background: rgba(255,255,255,.78);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .topic-card {
+      transition: all .25s ease;
+    }
+
+    .topic-card:hover {
+      transform: translateY(-7px);
+    }
+
+    .answer-btn {
+      transition: all .2s ease;
+    }
+
+    .answer-btn:hover {
+      transform: translateY(-4px) scale(1.02);
+    }
+
+    .answer-btn:active {
+      transform: scale(.96);
+    }
+
+    .answer-btn:disabled {
+      cursor: not-allowed;
+    }
+
+    .star-text {
+      text-shadow: 0 3px 12px rgba(250, 204, 21, .5);
+    }
+
+    .pattern {
+      background-image:
+        radial-gradient(rgba(99,102,241,.12) 1px, transparent 1px);
+      background-size: 22px 22px;
+    }
+  </style>
+</head>
+
+<body class="text-slate-800">
+
+  <!-- NAVBAR -->
+  <header class="sticky top-0 z-50 px-3 sm:px-6 pt-3">
+    <nav class="max-w-7xl mx-auto glass border border-white/80 shadow-card rounded-3xl">
+      <div class="h-18 sm:h-20 px-4 sm:px-6 flex items-center justify-between">
+
+        <button onclick="app.showDashboard()"
+                class="flex items-center gap-3 group">
+          <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl
+                      bg-gradient-to-br from-violet-600 to-indigo-600
+                      text-white flex items-center justify-center
+                      shadow-lg shadow-indigo-200
+                      group-hover:rotate-6 transition">
+            <i class="fa-solid fa-star text-2xl text-yellow-300"></i>
+          </div>
+
+          <div class="text-left">
+            <div class="text-xl sm:text-2xl font-bold
+                        bg-gradient-to-r from-violet-600 to-pink-500
+                        bg-clip-text text-transparent">
+              Math Star
+            </div>
+            <div class="text-[11px] sm:text-xs text-slate-500 font-semibold">
+              Grade 1 Adventures
+            </div>
+          </div>
+        </button>
+
+        <div class="flex items-center gap-2 sm:gap-4">
+          <button onclick="app.showDashboard()"
+                  class="hidden sm:flex items-center gap-2
+                         px-4 py-2.5 rounded-2xl
+                         bg-indigo-50 text-indigo-700
+                         font-bold hover:bg-indigo-100 transition">
+            <i class="fa-solid fa-house"></i>
+            Home
+          </button>
+
+          <div class="flex items-center gap-2
+                      bg-gradient-to-r from-amber-400 to-orange-500
+                      text-white px-3 sm:px-5 py-2.5 rounded-2xl
+                      shadow-lg shadow-orange-200">
+            <span class="text-lg">⭐</span>
+            <span id="global-stars" class="font-bold text-sm sm:text-base">
+              0 Stars
+            </span>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- MAIN -->
+  <main id="app-container"
+        class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="max-w-7xl mx-auto px-4 pb-6">
+    <div class="text-center text-xs text-slate-400 font-medium">
+      ⭐ Learn • Play • Count • Add • Subtract • Explore
+    </div>
+  </footer>
+
+  <!-- MODAL -->
+  <div id="modal"
+       class="fixed inset-0 z-[100] hidden items-center justify-center
+              bg-slate-950/50 backdrop-blur-sm px-4">
+
+    <div id="modal-card"
+         class="bg-white w-full max-w-md rounded-[2rem]
+                shadow-2xl border-4 border-violet-100
+                p-7 text-center animate-pop">
+
+      <div id="modal-icon"
+           class="w-20 h-20 mx-auto rounded-full
+                  bg-yellow-100 flex items-center justify-center
+                  text-4xl mb-5">
+        🏆
+      </div>
+
+      <h2 id="modal-title"
+          class="text-3xl font-bold text-slate-800 mb-2">
+        Amazing!
+      </h2>
+
+      <div id="modal-body"
+           class="text-slate-500 mb-6">
+      </div>
+
+      <button onclick="app.closeModal()"
+              class="w-full py-4 rounded-2xl
+                     bg-gradient-to-r from-violet-600 to-indigo-600
+                     text-white font-bold text-lg
+                     shadow-lg shadow-indigo-200
+                     hover:scale-[1.02] transition">
+        Continue Playing 🚀
+      </button>
+    </div>
+  </div>
+
+  <div id="fx-container"
+       class="fixed inset-0 z-[110] pointer-events-none overflow-hidden">
+  </div>
+
+<script>
+const mathTopics = [
+  {
+    id: "counting",
+    title: "Counting & Numbers",
+    subtitle: "Numbers up to 20",
+    icon: "🔢",
+    color: "blue",
+    gradient: "from-sky-400 to-blue-600",
+    light: "bg-blue-50",
+    description: "Count friendly objects and discover numbers!",
+    questions: [
+      {
+        type: "count",
+        target: 5,
+        emoji: "🍎",
+        prompt: "How many juicy apples do you see?"
+      },
+      {
+        type: "count",
+        target: 8,
+        emoji: "⭐",
+        prompt: "Count the shining stars!"
+      },
+      {
+        type: "count",
+        target: 4,
+        emoji: "🐱",
+        prompt: "How many playful kitties are here?"
+      },
+      {
+        type: "compare",
+        q: "Which number is bigger: 7 or 4?",
+        options: ["7", "4"],
+        answer: 0
+      },
+      {
+        type: "sequence",
+        q: "What number comes next? 1, 2, 3, ?",
+        options: ["4", "5", "0"],
+        answer: 0
+      }
+    ]
+  },
+
+  {
+    id: "addition",
+    title: "Fun Addition",
+    subtitle: "Put numbers together",
+    icon: "➕",
+    color: "emerald",
+    gradient: "from-emerald-400 to-teal-600",
+    light: "bg-emerald-50",
+    description: "Combine numbers and discover the total!",
+    questions: [
+      { type: "equation", a: 2, b: 3, prompt: "2 + 3 = ?" },
+      { type: "equation", a: 4, b: 1, prompt: "4 + 1 = ?" },
+      { type: "equation", a: 3, b: 3, prompt: "3 + 3 = ?" },
+      { type: "equation", a: 5, b: 2, prompt: "5 + 2 = ?" },
+      { type: "equation", a: 1, b: 6, prompt: "1 + 6 = ?" }
+    ]
+  },
+
+  {
+    id: "subtraction",
+    title: "Simple Subtraction",
+    subtitle: "Take numbers away",
+    icon: "➖",
+    color: "rose",
+    gradient: "from-pink-400 to-rose-600",
+    light: "bg-rose-50",
+    description: "Take things away and find out what's left!",
+    questions: [
+      { type: "sub_eq", a: 5, b: 2, prompt: "5 - 2 = ?" },
+      { type: "sub_eq", a: 4, b: 1, prompt: "4 - 1 = ?" },
+      { type: "sub_eq", a: 6, b: 3, prompt: "6 - 3 = ?" },
+      { type: "sub_eq", a: 7, b: 4, prompt: "7 - 4 = ?" },
+      { type: "sub_eq", a: 3, b: 0, prompt: "3 - 0 = ?" }
+    ]
+  },
+
+  {
+    id: "shapes",
+    title: "Shapes & Patterns",
+    subtitle: "Explore shapes",
+    icon: "🔷",
+    color: "violet",
+    gradient: "from-violet-500 to-purple-700",
+    light: "bg-violet-50",
+    description: "Find shapes, corners and colorful patterns!",
+    questions: [
+      {
+        type: "shape",
+        q: "Which shape has 3 equal sides and 3 corners?",
+        options: ["Triangle 🔺", "Square ⬛", "Circle 🟢"],
+        answer: 0
+      },
+      {
+        type: "shape",
+        q: "What shape looks like a wheel or a ball?",
+        options: ["Rectangle ▬", "Circle 🟢", "Square ⬛"],
+        answer: 1
+      },
+      {
+        type: "shape",
+        q: "Complete the pattern: 🔵, 🔴, 🔵, 🔴, ?",
+        options: ["🔵", "🔴", "⭐"],
+        answer: 0
+      },
+      {
+        type: "shape",
+        q: "How many corners does a square have?",
+        options: ["3", "4", "5"],
+        answer: 1
+      },
+      {
+        type: "shape",
+        q: "Which shape has 4 equal straight sides?",
+        options: ["Triangle 🔺", "Square ⬛", "Star ⭐"],
+        answer: 1
+      }
+    ]
+  }
+];
+
+class MathApp {
+
+  constructor() {
+    this.progress = {};
+    this.currentView = "dashboard";
+    this.activeTopicId = null;
+    this.currentQuestionIndex = 0;
+    this.score = 0;
+    this.loadState();
+    this.render();
+  }
+
+  loadState() {
+    try {
+      const saved = localStorage.getItem("math_star_progress_v3");
+      this.progress = saved ? JSON.parse(saved) : {};
+    } catch {
+      this.progress = {};
+    }
+  }
+
+  saveState() {
+    localStorage.setItem(
+      "math_star_progress_v3",
+      JSON.stringify(this.progress)
+    );
+
+    this.updateStars();
+  }
+
+  getTotalStars() {
+    return Object.values(this.progress)
+      .reduce((sum, item) => sum + (item.stars || 0), 0);
+  }
+
+  updateStars() {
+    const el = document.getElementById("global-stars");
+    if (el) {
+      el.textContent = `${this.getTotalStars()} Stars`;
+    }
+  }
+
+  showDashboard() {
+    this.currentView = "dashboard";
+    this.activeTopicId = null;
+    this.render();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  startTopic(id) {
+    this.activeTopicId = id;
+    this.currentQuestionIndex = 0;
+    this.score = 0;
+    this.currentView = "game";
+    this.render();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  render() {
+    const container = document.getElementById("app-container");
+
+    if (this.currentView === "dashboard") {
+      container.innerHTML = this.dashboardHTML();
+    } else {
+      container.innerHTML = this.gameHTML();
+    }
+
+    this.updateStars();
+  }
+
+  dashboardHTML() {
+    const totalStars = this.getTotalStars();
+
+    return `
+      <!-- HERO -->
+      <section class="relative overflow-hidden
+                      rounded-[2rem] sm:rounded-[2.5rem]
+                      bg-gradient-to-br from-violet-600
+                      via-indigo-600 to-blue-600
+                      text-white p-6 sm:p-10 shadow-soft mb-8">
+
+        <div class="absolute -right-10 -top-10
+                    text-[180px] opacity-10">⭐</div>
+
+        <div class="absolute -left-10 -bottom-20
+                    text-[170px] opacity-10">🚀</div>
+
+        <div class="relative z-10 grid lg:grid-cols-[1fr_220px]
+                    gap-8 items-center">
+
+          <div>
+            <span class="inline-flex items-center gap-2
+                         bg-white/15 border border-white/20
+                         px-4 py-2 rounded-full
+                         text-xs font-bold uppercase tracking-wider mb-5">
+              🎓 Grade 1 Mathematics
+            </span>
+
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl
+                       font-bold leading-tight mb-4">
+              Let's Make Math
+              <span class="text-yellow-300">Fun!</span> 🚀
+            </h1>
+
+            <p class="text-indigo-100 text-base sm:text-lg
+                      max-w-2xl leading-relaxed">
+              Choose an adventure, solve fun challenges,
+              and collect shiny stars as you learn!
+            </p>
+
+            <div class="flex flex-wrap gap-3 mt-7">
+              <div class="bg-white/15 border border-white/20
+                          rounded-2xl px-4 py-3">
+                <div class="text-xs text-indigo-100">Adventures</div>
+                <div class="font-bold text-xl">4 Topics</div>
+              </div>
+
+              <div class="bg-white/15 border border-white/20
+                          rounded-2xl px-4 py-3">
+                <div class="text-xs text-indigo-100">Challenges</div>
+                <div class="font-bold text-xl">20 Questions</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white/15 border border-white/20
+                      rounded-[2rem] p-6 text-center
+                      backdrop-blur-md animate-float">
+
+            <div class="text-sm font-bold text-indigo-100 mb-2">
+              MY STAR COLLECTION
+            </div>
+
+            <div class="text-7xl star-text mb-2">⭐</div>
+
+            <div class="text-5xl font-bold">
+              ${totalStars}
+            </div>
+
+            <div class="text-indigo-100 text-sm mt-1">
+              Stars earned
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION TITLE -->
+      <div class="flex items-end justify-between mb-5">
+        <div>
+          <div class="text-xs font-bold uppercase
+                      tracking-widest text-violet-500 mb-1">
+            Choose an adventure
+          </div>
+
+          <h2 class="text-2xl sm:text-3xl font-bold">
+            What shall we learn today? 🌈
+          </h2>
+        </div>
+      </div>
+
+      <!-- TOPICS -->
+      <section class="grid sm:grid-cols-2 gap-5">
+        ${mathTopics.map(topic => this.topicCard(topic)).join("")}
+      </section>
+
+      <!-- MINI INFO -->
+      <section class="mt-8 grid sm:grid-cols-3 gap-4">
+
+        <div class="glass rounded-3xl p-5 border border-white
+                    shadow-card flex gap-4 items-center">
+          <div class="w-12 h-12 rounded-2xl bg-yellow-100
+                      flex items-center justify-center text-2xl">
+            ⭐
+          </div>
+          <div>
+            <div class="font-bold">Earn Stars</div>
+            <div class="text-xs text-slate-500">
+              Get 2 stars for every correct answer.
+            </div>
+          </div>
+        </div>
+
+        <div class="glass rounded-3xl p-5 border border-white
+                    shadow-card flex gap-4 items-center">
+          <div class="w-12 h-12 rounded-2xl bg-blue-100
+                      flex items-center justify-center text-2xl">
+            🧠
+          </div>
+          <div>
+            <div class="font-bold">Learn by Playing</div>
+            <div class="text-xs text-slate-500">
+              Short activities made for Grade 1.
+            </div>
+          </div>
+        </div>
+
+        <div class="glass rounded-3xl p-5 border border-white
+                    shadow-card flex gap-4 items-center">
+          <div class="w-12 h-12 rounded-2xl bg-pink-100
+                      flex items-center justify-center text-2xl">
+            🏆
+          </div>
+          <div>
+            <div class="font-bold">Complete Topics</div>
+            <div class="text-xs text-slate-500">
+              Finish adventures and grow your collection.
+            </div>
+          </div>
+        </div>
+
+      </section>
+    `;
+  }
+
+  topicCard(topic) {
+    const p = this.progress[topic.id] || {
+      stars: 0,
+      completed: false
+    };
+
+    return `
+      <button onclick="app.startTopic('${topic.id}')"
+              class="topic-card text-left bg-white
+                     rounded-[2rem] border-2 border-white
+                     shadow-card p-5 sm:p-6
+                     relative overflow-hidden group">
+
+        <div class="absolute -right-10 -top-10
+                    w-36 h-36 rounded-full
+                    bg-gradient-to-br ${topic.gradient}
+                    opacity-[.08]
+                    group-hover:scale-125 transition duration-500">
+        </div>
+
+        <div class="relative z-10">
+
+          <div class="flex justify-between items-start mb-5">
+
+            <div class="w-16 h-16 rounded-2xl
+                        bg-gradient-to-br ${topic.gradient}
+                        flex items-center justify-center
+                        text-4xl shadow-lg text-white
+                        group-hover:rotate-3 transition">
+              ${topic.icon}
+            </div>
+
+            ${
+              p.completed
+              ? `
+                <span class="px-3 py-1.5 rounded-full
+                             bg-emerald-100 text-emerald-700
+                             text-xs font-bold">
+                  ✓ Completed
+                </span>
+              `
+              : `
+                <span class="px-3 py-1.5 rounded-full
+                             bg-slate-100 text-slate-500
+                             text-xs font-bold">
+                  Ready!
+                </span>
+              `
+            }
+          </div>
+
+          <div class="text-xs uppercase tracking-wider
+                      text-slate-400 font-bold">
+            ${topic.subtitle}
+          </div>
+
+          <h3 class="text-2xl font-bold mt-1 mb-2
+                     group-hover:text-violet-600 transition">
+            ${topic.title}
+          </h3>
+
+          <p class="text-sm text-slate-500
+                    leading-relaxed mb-6">
+            ${topic.description}
+          </p>
+
+          <div class="flex items-center justify-between
+                      border-t border-slate-100 pt-4">
+
+            <div class="flex items-center gap-1.5
+                        text-sm font-bold text-amber-500">
+              ⭐ ${p.stars} stars
+            </div>
+
+            <span class="px-4 py-2.5 rounded-xl
+                         bg-slate-900 text-white
+                         text-sm font-bold
+                         group-hover:bg-violet-600 transition">
+              Play <i class="fa-solid fa-arrow-right ml-1"></i>
+            </span>
+          </div>
+        </div>
+      </button>
+    `;
+  }
+
+  gameHTML() {
+    const topic = mathTopics.find(
+      t => t.id === this.activeTopicId
+    );
+
+    if (!topic) return "";
+
+    const q = topic.questions[this.currentQuestionIndex];
+    const total = topic.questions.length;
+    const current = this.currentQuestionIndex + 1;
+    const percentage = Math.round(
+      (this.currentQuestionIndex / total) * 100
+    );
+
+    return `
+      <div class="max-w-4xl mx-auto">
+
+        <!-- GAME HEADER -->
+        <div class="flex items-center justify-between mb-5">
+
+          <button onclick="app.showDashboard()"
+                  class="flex items-center gap-2
+                         bg-white px-4 py-2.5 rounded-2xl
+                         shadow-sm border border-slate-100
+                         text-slate-600 font-bold
+                         hover:text-violet-600 transition">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span class="hidden sm:inline">Exit</span>
+          </button>
+
+          <div class="flex items-center gap-2">
+            <span class="hidden sm:block px-3 py-2
+                         rounded-xl bg-white border
+                         border-slate-100 text-xs font-bold">
+              ${topic.icon} ${topic.title}
+            </span>
+
+            <span class="px-4 py-2 rounded-xl
+                         bg-violet-100 text-violet-700
+                         text-sm font-bold">
+              ${current} / ${total}
+            </span>
+          </div>
+        </div>
+
+        <!-- PROGRESS -->
+        <div class="bg-white rounded-2xl p-2
+                    shadow-sm border border-slate-100 mb-6">
+
+          <div class="h-4 bg-slate-100 rounded-xl overflow-hidden">
+
+            <div class="h-full rounded-xl
+                        bg-gradient-to-r ${topic.gradient}
+                        transition-all duration-500"
+                 style="width:${percentage}%">
+            </div>
+
+          </div>
+        </div>
+
+        <!-- GAME CARD -->
+        <div class="bg-white rounded-[2.5rem]
+                    shadow-soft border border-white
+                    overflow-hidden">
+
+          <!-- TOP STRIP -->
+          <div class="bg-gradient-to-r ${topic.gradient}
+                      h-3">
+          </div>
+
+          <div class="p-5 sm:p-10">
+
+            <div class="flex justify-center mb-6">
+
+              <div class="w-20 h-20 rounded-[1.7rem]
+                          bg-gradient-to-br ${topic.gradient}
+                          flex items-center justify-center
+                          text-5xl shadow-lg animate-float">
+                ${topic.icon}
+              </div>
+
+            </div>
+
+            ${this.questionHTML(q)}
+
+            <div id="question-feedback"
+                 class="min-h-[70px] mt-6">
+            </div>
+
+          </div>
+        </div>
+
+        <!-- SCORE -->
+        <div class="mt-5 flex justify-center">
+          <div class="inline-flex items-center gap-2
+                      bg-white rounded-2xl px-5 py-3
+                      shadow-sm border border-slate-100
+                      font-bold">
+            <span>⭐</span>
+            <span>${this.score} stars this adventure</span>
+          </div>
+        </div>
+
+      </div>
+    `;
+  }
+
+  questionHTML(q) {
+
+    if (q.type === "count") {
+
+      const objects = Array.from(
+        { length: q.target },
+        (_, i) =>
+          `<span class="text-5xl sm:text-6xl animate-float"
+                 style="animation-delay:${i * .12}s">
+             ${q.emoji}
+           </span>`
+      ).join("");
+
+      let options = [
+        q.target,
+        q.target + 1,
+        Math.max(1, q.target - 1)
+      ];
+
+      options = [...new Set(options)]
+        .sort(() => Math.random() - .5);
+
+      const correct = options.indexOf(q.target);
+
+      return `
+        <h2 class="text-xl sm:text-2xl font-bold
+                   text-center mb-5">
+          ${q.prompt}
+        </h2>
+
+        <div class="pattern rounded-3xl
+                    border-2 border-dashed
+                    border-indigo-200
+                    bg-indigo-50/60
+                    min-h-36 p-6
+                    flex flex-wrap
+                    items-center justify-center
+                    gap-4 mb-7">
+          ${objects}
+        </div>
+
+        <p class="text-center text-sm
+                  text-slate-400 font-semibold mb-4">
+          Tap the correct number 👇
+        </p>
+
+        ${this.answerButtons(
+          options,
+          correct
+        )}
+      `;
+    }
+
+    if (
+      q.type === "equation" ||
+      q.type === "sub_eq"
+    ) {
+
+      const answer =
+        q.type === "equation"
+          ? q.a + q.b
+          : q.a - q.b;
+
+      let options = [
+        answer,
+        answer + 1,
+        answer > 0 ? answer - 1 : answer + 2
+      ];
+
+      options = [...new Set(options)]
+        .sort(() => Math.random() - .5);
+
+      const correct = options.indexOf(answer);
+
+      const visual =
+        q.type === "equation"
+          ? `
+            <div class="flex justify-center
+                        items-center gap-3 mb-6">
+              <div class="number-box bg-emerald-100
+                          text-emerald-700">
+                ${q.a}
+              </div>
+              <span class="text-3xl font-bold">+</span>
+              <div class="number-box bg-blue-100
+                          text-blue-700">
+                ${q.b}
+              </div>
+              <span class="text-3xl font-bold">=</span>
+              <div class="number-box bg-yellow-100
+                          text-yellow-700">
+                ?
+              </div>
+            </div>
+          `
+          :
+          `
+            <div class="flex justify-center
+                        items-center gap-3 mb-6">
+              <div class="number-box bg-pink-100
+                          text-pink-700">
+                ${q.a}
+              </div>
+              <span class="text-3xl font-bold">−</span>
+              <div class="number-box bg-orange-100
+                          text-orange-700">
+                ${q.b}
+              </div>
+              <span class="text-3xl font-bold">=</span>
+              <div class="number-box bg-yellow-100
+                          text-yellow-700">
+                ?
+              </div>
+            </div>
+          `;
+
+      return `
+        <h2 class="text-3xl sm:text-4xl
+                   font-bold text-center mb-4">
+          ${q.prompt}
+        </h2>
+
+        ${visual}
+
+        <p class="text-center text-sm
+                  text-slate-400 font-semibold mb-5">
+          Think carefully! 🧠
+        </p>
+
+        ${this.answerButtons(
+          options,
+          correct
+        )}
+      `;
+    }
+
+    return `
+      <h2 class="text-xl sm:text-2xl
+                 font-bold text-center
+                 leading-relaxed mb-7">
+        ${q.q}
+      </h2>
+
+      ${this.answerButtons(
+        q.options,
+        q.answer
+      )}
+    `;
+  }
+
+  answerButtons(options, correct) {
+    return `
+      <div class="grid sm:grid-cols-3 gap-3">
+        ${options.map((option, index) => `
+          <button
+            class="answer-btn min-h-[70px]
+                   bg-slate-50 hover:bg-violet-50
+                   border-2 border-slate-200
+                   hover:border-violet-400
+                   rounded-2xl px-4
+                   text-xl sm:text-2xl
+                   font-bold text-slate-700
+                   shadow-sm"
+            onclick="app.answerQuestion(
+              ${index},
+              ${correct}
+            )">
+            ${option}
+          </button>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  answerQuestion(selected, correct) {
+
+    const buttons =
+      document.querySelectorAll(".answer-btn");
+
+    buttons.forEach(button => {
+      button.disabled = true;
+    });
+
+    const feedback =
+      document.getElementById("question-feedback");
+
+    if (selected === correct) {
+
+      this.score += 2;
+
+      feedback.innerHTML = `
+        <div class="rounded-2xl
+                    bg-emerald-50
+                    border-2 border-emerald-200
+                    text-emerald-700
+                    px-5 py-4
+                    text-center
+                    font-bold animate-pop">
+          <div class="text-3xl mb-1">🎉</div>
+          Correct! +2 Stars ⭐
+        </div>
+      `;
+
+      this.confetti();
+
+    } else {
+
+      feedback.innerHTML = `
+        <div class="rounded-2xl
+                    bg-orange-50
+                    border-2 border-orange-200
+                    text-orange-700
+                    px-5 py-4
+                    text-center
+                    font-bold animate-pop">
+          <div class="text-3xl mb-1">💪</div>
+          Good try! Keep learning!
+        </div>
+      `;
+    }
+
+    setTimeout(() => {
+
+      const topic =
+        mathTopics.find(
+          t => t.id === this.activeTopicId
+        );
+
+      this.currentQuestionIndex++;
+
+      if (
+        this.currentQuestionIndex <
+        topic.questions.length
+      ) {
+        this.render();
+      } else {
+        this.finishTopic();
+      }
+
+    }, 1100);
+  }
+
+  finishTopic() {
+
+    const id = this.activeTopicId;
+
+    if (!this.progress[id]) {
+      this.progress[id] = {
+        stars: 0,
+        completed: false
+      };
+    }
+
+    this.progress[id].stars =
+      Math.max(
+        this.progress[id].stars,
+        this.score
+      );
+
+    this.progress[id].completed = true;
+
+    this.saveState();
+
+    this.showModal(
+      "🏆",
+      "Adventure Complete!",
+      `
+        <p class="mb-3">
+          Fantastic work! You finished this math adventure.
+        </p>
+
+        <div class="text-4xl font-bold
+                    text-amber-500 mb-2">
+          ⭐ ${this.score}
+        </div>
+
+        <p class="text-sm">
+          Stars earned in this adventure
+        </p>
+      `
+    );
+  }
+
+  showModal(icon, title, body) {
+
+    document.getElementById("modal-icon")
+      .textContent = icon;
+
+    document.getElementById("modal-title")
+      .textContent = title;
+
+    document.getElementById("modal-body")
+      .innerHTML = body;
+
+    const modal =
+      document.getElementById("modal");
+
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+  }
+
+  closeModal() {
+
+    const modal =
+      document.getElementById("modal");
+
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+
+    this.showDashboard();
+  }
+
+  confetti() {
+
+    const container =
+      document.getElementById("fx-container");
+
+    const emojis = [
+      "⭐", "✨", "🎉", "💜",
+      "💙", "💛", "🌟"
+    ];
+
+    for (let i = 0; i < 18; i++) {
+
+      const item =
+        document.createElement("div");
+
+      item.textContent =
+        emojis[
+          Math.floor(
+            Math.random() * emojis.length
+          )
+        ];
+
+      item.className =
+        "absolute text-2xl animate-confetti";
+
+      item.style.left =
+        `${Math.random() * 100}%`;
+
+      item.style.top =
+        `${Math.random() * 20 + 5}%`;
+
+      item.style.animationDelay =
+        `${Math.random() * .3}s`;
+
+      container.appendChild(item);
+
+      setTimeout(
+        () => item.remove(),
+        1500
+      );
+    }
+  }
+}
+
+/* Number-box styling */
+const style = document.createElement("style");
+
+style.textContent = `
+  .number-box {
+    width: 70px;
+    height: 70px;
+    border-radius: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.2rem;
+    font-weight: 700;
+    box-shadow: 0 8px 20px rgba(15,23,42,.08);
+  }
+`;
+
+document.head.appendChild(style);
+
+const app = new MathApp();
+</script>
+
+</body>
+</html>
